@@ -1,41 +1,9 @@
-// --- STATE & CONFIG ---
+// --- STATE ---
 let timeLeft = 25 * 60;
 let timerId = null;
 let isRunning = false;
 let isFocusMode = true;
-let currentAmbience = null;
-
-// Sound Objekte
-const sounds = {
-    // 1. Die "guten" Sounds von früher wiederhergestellt:
-    click: new Audio('https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a73467.mp3'), 
-    gong: new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_0625c153e2.mp3'),
-    
-    // 2. Regen & White Noise (Getauscht & bessere Links)
-    // Dieser Link klingt mehr nach echtem Regen:
-    rain: new Audio('https://cdn.pixabay.com/audio/2022/05/17/audio_3497d3534b.mp3'),
-    // Dieser Link ist sanftes Rauschen (Brownian Noise), weniger schrill:
-    white: new Audio('https://cdn.pixabay.com/audio/2021/11/24/audio_8295b28a64.mp3'),
-
-    // 3. Cafe: Neuer HTTPS Stream (Star Wars Lofi - sehr stabil & entspannt)
-    // Alternativ: Wenn das nicht geht, nutzen wir Lofi Girl
-    cafe: new Audio('https://stream.zeno.fm/0r0xa854rp8uv') 
-};
-
-// --- LAUTSTÄRKE MIXING (Hier war das Problem!) ---
-// Hintergrund muss LEISE sein (0.1 = 10%, 0.2 = 20%)
-sounds.rain.volume = 0.2; 
-sounds.white.volume = 0.15; 
-sounds.cafe.volume = 0.3; 
-
-// Start/Ende Sounds dürfen etwas lauter sein
-sounds.click.volume = 0.5;
-sounds.gong.volume = 0.6;
-
-// Loops aktivieren (damit es weiterläuft)
-sounds.rain.loop = true;
-sounds.white.loop = true;
-// Stream braucht keinen Loop
+let currentAudioId = null; 
 
 // --- DOM ELEMENTS ---
 const elements = {
@@ -50,19 +18,70 @@ const elements = {
     notepad: document.getElementById('notepad'),
     mainTask: document.getElementById('main-task-input'),
     shortcutBtn: document.getElementById('pomodoroShortcut'),
-    resetBtn: document.getElementById('resetBtn')
+    resetBtn: document.getElementById('resetBtn'),
+    // Audio Elements aus dem HTML holen
+    audioClick: document.getElementById('audio-click'),
+    audioGong: document.getElementById('audio-gong')
 };
 
 // --- INITIALIZATION ---
 function init() {
+    // Theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
         elements.themeToggle.checked = true;
     }
+    
+    // Lautstärke Einstellungen
+    const rain = document.getElementById('audio-rain');
+    const white = document.getElementById('audio-white');
+    const cafe = document.getElementById('audio-cafe');
+
+    if(rain) rain.volume = 0.3;
+    if(white) white.volume = 0.2;
+    if(cafe) cafe.volume = 0.6;
+    
+    if(elements.audioClick) elements.audioClick.volume = 1.0;
+    if(elements.audioGong) elements.audioGong.volume = 1.0;
+
     loadStats();
     elements.notepad.value = localStorage.getItem('notepadContent') || '';
     elements.mainTask.value = localStorage.getItem('mainTaskContent') || '';
+}
+
+// --- SOUND CONTROL ---
+function playSelectedAmbience() {
+    const selection = elements.soundSelect.value;
+    stopAmbience();
+
+    if (selection === 'none') return;
+
+    let targetId = '';
+    if (selection === 'rain') targetId = 'audio-rain';
+    if (selection === 'white') targetId = 'audio-white';
+    if (selection === 'cafe') targetId = 'audio-cafe';
+
+    if (targetId) {
+        const player = document.getElementById(targetId);
+        if(player) {
+            player.play().catch(e => console.log("Abspielen blockiert:", e));
+            currentAudioId = targetId;
+        }
+    }
+}
+
+function stopAmbience() {
+    if (currentAudioId) {
+        const player = document.getElementById(currentAudioId);
+        if(player) {
+            player.pause();
+            if (currentAudioId !== 'audio-cafe') {
+                player.currentTime = 0;
+            }
+        }
+        currentAudioId = null;
+    }
 }
 
 // --- TIMER LOGIC ---
@@ -73,24 +92,14 @@ function updateDisplay() {
     document.title = `(${minutes}:${seconds.toString().padStart(2, '0')}) GlassFocus`;
 }
 
-function toggleTimer() {
-    if (isRunning) {
-        pauseTimer();
-    } else {
-        startTimer();
-    }
-}
-
 function startTimer() {
     isRunning = true;
-    // Sound abspielen & Fehler abfangen (falls iPhone blockiert)
-    sounds.click.play().catch(e => console.log("Click blocked:", e));
-    
+    if(elements.audioClick) elements.audioClick.play();
+    playSelectedAmbience();
+
     elements.startBtn.textContent = 'Pause';
     elements.status.textContent = isFocusMode ? 'FOKUS MODE' : 'PAUSENZEIT';
     elements.status.style.opacity = '1';
-    
-    playAmbience();
 
     timerId = setInterval(() => {
         timeLeft--;
@@ -120,9 +129,17 @@ function resetTimer() {
     elements.status.style.opacity = '1';
 }
 
+function toggleTimer() {
+    if (isRunning) {
+        pauseTimer();
+    } else {
+        startTimer();
+    }
+}
+
 function completeSession() {
     pauseTimer();
-    sounds.gong.play().catch(e => console.log("Gong blocked:", e));
+    if(elements.audioGong) elements.audioGong.play();
     
     if (isFocusMode) {
         incrementStats();
@@ -148,36 +165,26 @@ function quickStartPomodoro() {
     startTimer();
 }
 
-// --- AMBIENCE SOUNDS ---
-function playAmbience() {
-    const selectedSound = elements.soundSelect.value;
-    if (selectedSound !== 'none' && sounds[selectedSound]) {
-        currentAmbience = sounds[selectedSound];
-        // Promise Error Handling für Safari
-        let playPromise = currentAmbience.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                // Playback started!
-            })
-            .catch(error => {
-                console.log("Ambience Autoplay prevented. User interaction needed.", error);
-            });
-        }
+// --- EVENT LISTENERS ---
+elements.soundSelect.addEventListener('change', function() {
+    if (isRunning) {
+        playSelectedAmbience();
     }
-}
+});
 
-function stopAmbience() {
-    if (currentAmbience) {
-        currentAmbience.pause();
-        // Stream nicht zurückspulen, Files schon
-        if(currentAmbience !== sounds.cafe) {
-            currentAmbience.currentTime = 0;
-        }
-    }
-}
+elements.startBtn.addEventListener('click', toggleTimer);
+elements.resetBtn.addEventListener('click', resetTimer);
+elements.shortcutBtn.addEventListener('click', quickStartPomodoro);
+elements.focusSelect.addEventListener('change', function() { if (!isRunning && isFocusMode) { timeLeft = parseInt(this.value) * 60; updateDisplay(); }});
+elements.breakSelect.addEventListener('change', function() { if (!isRunning && !isFocusMode) { timeLeft = parseInt(this.value) * 60; updateDisplay(); }});
+elements.themeToggle.addEventListener('change', function(e) {
+    const theme = e.target.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+});
+elements.notepad.addEventListener('input', (e) => localStorage.setItem('notepadContent', e.target.value));
+elements.mainTask.addEventListener('input', (e) => localStorage.setItem('mainTaskContent', e.target.value));
 
-// --- STATS & EVENTS ---
 function loadStats() {
     const today = new Date().toLocaleDateString();
     const stats = JSON.parse(localStorage.getItem('glassFocusStats')) || { date: today, count: 0 };
@@ -185,31 +192,12 @@ function loadStats() {
     elements.sessionCount.textContent = stats.count;
     localStorage.setItem('glassFocusStats', JSON.stringify(stats));
 }
-
 function incrementStats() {
     const stats = JSON.parse(localStorage.getItem('glassFocusStats'));
     stats.count++;
     localStorage.setItem('glassFocusStats', JSON.stringify(stats));
     elements.sessionCount.textContent = stats.count;
 }
-
-elements.startBtn.addEventListener('click', toggleTimer);
-elements.resetBtn.addEventListener('click', resetTimer);
-elements.shortcutBtn.addEventListener('click', quickStartPomodoro);
-
-elements.focusSelect.addEventListener('change', function() { if (!isRunning && isFocusMode) { timeLeft = parseInt(this.value) * 60; updateDisplay(); }});
-elements.breakSelect.addEventListener('change', function() { if (!isRunning && !isFocusMode) { timeLeft = parseInt(this.value) * 60; updateDisplay(); }});
-elements.soundSelect.addEventListener('change', function() { if (isRunning) { stopAmbience(); playAmbience(); }});
-
-elements.themeToggle.addEventListener('change', function(e) {
-    const theme = e.target.checked ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-});
-
-elements.notepad.addEventListener('input', (e) => localStorage.setItem('notepadContent', e.target.value));
-elements.mainTask.addEventListener('input', (e) => localStorage.setItem('mainTaskContent', e.target.value));
-
 function flashScreen(color) {
     const originalBg = getComputedStyle(document.body).backgroundColor;
     document.body.style.backgroundColor = color;
