@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GlassFocus">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="stylesheet" href="style.css">
+    <title>Glass Focus</title>
+</head>
+<body>
+
+    <div class="app-container glass">
+        
+        <header class="header">
+            <div class="stats-badge glass-inset">
+                <span id="session-count">0</span> Sessions heute
+            </div>
+            <div class="theme-switch-wrapper">
+                <span>☀️</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider"></span>
+                </label>
+                <span>🌙</span>
+            </div>
+        </header>
+
+        <section class="task-section">
+            <input type="text" id="main-task-input" class="glass-input" placeholder="Was ist dein Hauptfokus?">
+        </section>
+
+        <section class="timer-section">
+            <div class="status" id="status-text">BEREIT</div>
+            <div class="timer-display" id="timer">25:00</div>
+        </section>
+
+        <section class="controls-container">
+            <div class="main-controls">
+                <button class="btn btn-primary" id="startBtn">Start</button>
+                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+            </div>
+            
+            <button class="btn btn-secondary shortcut-btn" id="pomodoroShortcut">
+                <span>🚀</span> Quick Start (25/5)
+            </button>
+        </section>
+
+        <section class="settings-section">
+            
+            <div class="settings-row">
+                <div class="setting-group">
+                    <label>Fokuszeit</label>
+                    <select id="focusTimeSelect">
+                        <option value="15">15 Min</option>
+                        <option value="25" selected>25 Min</option>
+                        <option value="45">45 Min</option>
+                        <option value="60">60 Min</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Pause</label>
+                    <select id="breakTimeSelect">
+                        <option value="5" selected>5 Min</option>
+                        <option value="10">10 Min</option>
+                        <option value="15">15 Min</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-group full-width">
+                <label>Atmosphäre</label>
+                <select id="soundSelect">
+                    <option value="none" selected>🔇 Stille</option>
+                    <option value="rain">🌧️ Leichter Regen</option>
+                    <option value="cafe">☕ Café Umgebung</option>
+                    <option value="white">🌊 White Noise</option>
+                </select>
+            </div>
+
+            <div class="notepad-area">
+                <label>Gedanken & ToDos (Brain Dump)</label>
+                <textarea id="notepad" class="glass-input" placeholder="Schreib es auf, damit du es nicht vergisst..."></textarea>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

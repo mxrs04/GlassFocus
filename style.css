@@ -1,0 +1,239 @@
+:root {
+    --bg-color: #f2f2f7;
+    --text-color: #1c1c1e;
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.8);
+    --glass-inset: rgba(0, 0, 0, 0.05);
+    --accent-color: #007aff; 
+    --secondary-btn-bg: rgba(0, 0, 0, 0.05);
+    --secondary-btn-text: #1c1c1e;
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    --input-bg: rgba(255,255,255,0.5);
+    --toggle-track: #e9e9ea;
+    --toggle-thumb: #fff;
+}
+
+[data-theme="dark"] {
+    --bg-color: #000000;
+    --text-color: #ffffff;
+    --glass-bg: rgba(28, 28, 30, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-inset: rgba(255, 255, 255, 0.1);
+    --accent-color: #0a84ff;
+    --secondary-btn-bg: rgba(255, 255, 255, 0.12);
+    --secondary-btn-text: #ffffff;
+    --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --input-bg: rgba(0,0,0,0.3);
+    --toggle-track: #39393d;
+    --toggle-thumb: #fff;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-color);
+    transition: background-color 0.5s ease, color 0.5s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-color);
+    -webkit-tap-highlight-color: transparent;
+    padding: 20px 10px;
+    box-sizing: border-box;
+}
+
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 28px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow);
+    transition: all 0.5s ease;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 25px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stats-badge {
+    background: var(--glass-inset);
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 28px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--toggle-track);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--toggle-thumb);
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider { background-color: #30d158; }
+input:checked + .slider:before { transform: translateX(18px); }
+
+.glass-input {
+    width: 100%;
+    border: none;
+    background: var(--input-bg);
+    padding: 15px;
+    border-radius: 16px;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    resize: none;
+}
+
+.glass-input::placeholder { color: var(--text-color); opacity: 0.5; }
+
+#main-task-input {
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.status {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 5px;
+}
+
+.timer-display {
+    font-size: 4.5rem;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.controls-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.main-controls { display: flex; gap: 15px; }
+
+.btn {
+    border: none;
+    padding: 16px;
+    font-size: 1.1rem;
+    border-radius: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.1s ease;
+    flex: 1;
+}
+
+.btn:active { transform: scale(0.96); }
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-btn-bg);
+    color: var(--secondary-btn-text);
+}
+
+.shortcut-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    font-size: 0.95rem;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 20px;
+}
+
+.settings-row { display: flex; gap: 15px; }
+
+.setting-group { flex: 1; text-align: left; }
+.full-width { width: 100%; }
+
+.setting-group label {
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+    display: block;
+    opacity: 0.7;
+    font-weight: 600;
+    padding-left: 5px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.notepad-area textarea {
+    min-height: 80px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
