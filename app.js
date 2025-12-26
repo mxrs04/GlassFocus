@@ -33,7 +33,7 @@ function init() {
     const cafe = document.getElementById('audio-cafe');
 
     if(rain) rain.volume = 0.3;
-    if(white) white.volume = 0.05; 
+    if(white) white.volume = 0.01; 
     if(cafe) cafe.volume = 0.4;
     
     if(elements.audioClick) elements.audioClick.volume = 1.0;
